@@ -1,0 +1,158 @@
+<html>
+<head>
+  <title>AshBucks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: black;
+      color:green;
+    }
+    a {
+      font-size: 30px;
+      text-decoration: none;
+      background-color: green;
+      color: white;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 5px;
+      margin: 10px;
+    }
+    #logout {
+      font-size: 30px;
+      text-decoration: none;
+      background-color: green;
+      color: white;
+      padding: 5px;
+      margin: 10px;
+      
+    }
+    button {
+      font-size: 30px;
+      text-decoration: none;
+      background-color: green;
+      color: white;
+      padding: 5px;
+      margin: 10px;
+    }
+
+    input {
+      font-size: 30px;
+      text-decoration: none;
+      border: 4px solid green;
+      background-color: black;
+      color: green;
+      padding: 5px;
+      margin: 10px;
+      outline: none;
+    }
+    .section {
+      border-bottom: 1px solid green;
+      margin-bottom: 0px;
+      padding: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+  </div>
+  <script>
+
+    function logout(){
+      window.localStorage.removeItem("username")
+window.localStorage.removeItem("password")
+      window.open("https://AshBucks.authorises.repl.co", "_self")
+    }
+
+    function redeem(){
+      username = window.localStorage.getItem("username")
+      password = window.localStorage.getItem("password")
+      code = document.getElementById("code").value
+
+      fetch(`https://AshBucks.authorises.repl.co/redeem?username=${username}&password=${password}&code=${code}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if(data.hasOwnProperty("success")){
+            document.getElementById("redeem_status").innerHTML="Redeemed successfully"
+            window.open("https://AshBucks.authorises.repl.co", "_self")
+          }else{
+            document.getElementById("redeem_status").innerHTML=data.error
+          }
+        })
+      
+    }
+    
+    function transfer(){
+      username = window.localStorage.getItem("username")
+      password = window.localStorage.getItem("password")
+      sendto = document.getElementById("username").value
+      amount = document.getElementById("amount").value
+
+      console.log(username)
+      
+      fetch(`https://AshBucks.authorises.repl.co/transfer?username=${username}&password=${password}&sendto=${sendto}&amount=${amount}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data)
+          if(data.hasOwnProperty("success")){
+            document.getElementById("status").innerHTML="Transfer was successful..."
+            window.open("https://AshBucks.authorises.repl.co", "_self")
+          }else{
+            document.getElementById("status").innerHTML=data.error
+          }
+        });
+    }
+    
+    ls = document.localStorage
+    
+    if (localStorage.getItem("username") === null) {
+      document.getElementById("content").innerHTML=`
+      
+          <center>
+      <a href="/signup"">Sign up</a> <p></p>
+      <a href="/login">Log in</a>
+    </center>
+      
+      `
+    }else{
+
+      var username = window.localStorage.getItem("username")
+      var password = window.localStorage.getItem("password")
+      
+      fetch(`https://AshBucks.authorises.repl.co/userinfo?username=${username}&password=${password}`)
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data)
+            document.getElementById("content").innerHTML=`
+            <center>
+            <div class="section">
+              <button id="logout" onclick="logout()">Log out</button><p>
+              <span style="font-size:40px">${data.account.username}</span><p>
+              <span style="font-size:40px">Balance: ${data.account.balance}</span><p>
+            </div>
+            <div class="section">
+              <p><p><p>
+              <span style="font-size: 40px">Transfer money</span><p>
+              <span style="font-size: 40px">Recipient</span> <input id="username" type="text" placeholder="Enter username"><p>
+              <span style="font-size: 40px">Amount</span> <input id="amount" type="text" placeholder="Enter amount to send"><p>
+              <button onclick="transfer()">Transfer</button><p>
+              <span id="status"></span>
+            </div>
+            <div class="section">
+              <p><p><p>
+              <span style="font-size: 40px">Redeem codes</span><p>
+              <span style="font-size: 40px">Code</span> <input id="code" type="text" placeholder="Enter code here"><p>
+              <button onclick="redeem()">Redeem</button><p>
+              <span id="redeem_status"></span>
+            </div>
+            </center>
+            `
+      })
+      
+
+    }
+    
+  </script>
+  
+</body>
+</html>
