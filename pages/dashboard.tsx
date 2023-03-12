@@ -1,5 +1,5 @@
-import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button } from '@mantine/core';
-import { IconHomeDollar, IconArrowsDiff, IconGift, IconSettingsDollar, IconLogout } from '@tabler/icons-react';
+import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button, Checkbox } from '@mantine/core';
+import { IconHomeDollar, IconArrowsDiff, IconGift, IconSettingsDollar, IconLogout, IconDeviceDesktopAnalytics, IconSpy } from '@tabler/icons-react';
 import {useState, useEffect} from 'react'
 import { DataTable, DataTableSortStatus  } from 'mantine-datatable';
 import dayjs from 'dayjs';
@@ -43,7 +43,7 @@ function useWindowSize() {
 export default function Home() {
 
     const size = useWindowSize();
-    const [userData, setUserData] = useState({"transactions":[],"username":"",balance:0,loaded:false}); 
+    const [userData, setUserData] = useState({"transactions":[],"username":"",balance:0,loaded:false, admin:false}); 
 
     const [page, setPage] = useState(1);
     const [records, setRecords] = useState(userData.transactions.slice(0, 5));
@@ -77,6 +77,9 @@ export default function Home() {
                     .then((data) => {
                         if(data.hasOwnProperty("success")){
                             data.account["loaded"]=true
+                            if(!(data.account.hasOwnProperty("admin"))){
+                                data.account["admin"]=false
+                            }
                             data.account.transactions = data.account.transactions.reverse()
                             setUserData(data.account)
                             setRecords(data.account.transactions.slice(0, 5))
@@ -94,6 +97,18 @@ export default function Home() {
         reloadData()
     }
 
+    var adminTab = (
+        <Tabs.Tab value="admin" icon={<IconDeviceDesktopAnalytics size="0.8rem" />}>Admin</Tabs.Tab>
+    )
+
+    var adminSection = (
+        <Tabs.Panel value="admin" pt="xs">
+            <Center>
+                <Space h="xl" />
+                <Text color="green.4">Secret admin stuff</Text>
+            </Center>
+        </Tabs.Panel>
+    )
 
     if(userData){
         var show = userData.loaded
@@ -102,6 +117,7 @@ export default function Home() {
             initialValues: {
               recipient: '',
               amount: '',
+              hide: false
             }
           });
 
@@ -131,6 +147,7 @@ export default function Home() {
                         <Tabs.Tab value="transfer" icon={<IconArrowsDiff size="0.8rem" />}>Transfer</Tabs.Tab>
                         <Tabs.Tab value="redeem" icon={<IconGift size="0.8rem" />}>Redeem</Tabs.Tab>
                         <Tabs.Tab value="settings" icon={<IconSettingsDollar size="0.8rem" />}>Settings</Tabs.Tab>
+                        {userData.admin ? adminTab : <></>}
                         </Tabs.List>
                 
                         <Tabs.Panel value="dashboard" pt="xs">
@@ -150,7 +167,7 @@ export default function Home() {
                                             accessor: 'date',
                                             textAlignment: 'center',
                                             width: '25%',
-                                            render: ({ date }) => dayjs(date).format('MMM D YYYY'),
+                                            render: ({ date }) => dayjs(date).format('HH:MM MM/D/YYYY'),
                                             sortable: true,
                                         },
                                         ]}
@@ -181,7 +198,8 @@ export default function Home() {
                                     <form onSubmit={form.onSubmit((values) => {
                                         const username = localStorage.getItem("username")
                                         const password = localStorage.getItem("password")
-                                        fetch(`https://ashbucks.authorises.repl.co/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}`)
+                                        var hide = values.hide?"&notrace=true":""
+                                        fetch(`https://ashbucks.authorises.repl.co/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}${hide}`)
                                         .then((res) => res.json())
                                         .then((data) => {
                                             if(data.hasOwnProperty("success")){
@@ -206,6 +224,13 @@ export default function Home() {
                                             step={0.05}
                                             max={25000}
                                             {...form.getInputProps('amount')} 
+                                        />
+                                    
+                                        <Checkbox
+                                            icon={IconSpy}
+                                            mt="md"
+                                            label="Make this transaction invisible"
+                                            {...form.getInputProps('hide')} 
                                         />
                                         <Button leftIcon={<IconArrowsDiff />} type="submit" fullWidth mt="xl">
                                             Transfer
@@ -273,6 +298,7 @@ export default function Home() {
                             </Center>
 
                         </Tabs.Panel>
+                        {userData.admin ? adminSection : <></>}
                     </Tabs>
                 </Paper>
             </Center>
