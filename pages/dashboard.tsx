@@ -72,7 +72,7 @@ export default function Home() {
                 const username = localStorage.getItem("username")
                 const password = localStorage.getItem("password")
     
-                fetch(`http://ashbucks.authorises.repl.co/userinfo?username=${username}&password=${password}`)
+                fetch(`https://ashbucks.authorises.repl.co/userinfo?username=${username}&password=${password}`)
                     .then((res) => res.json())
                     .then((data) => {
                         if(data.hasOwnProperty("success")){
@@ -181,7 +181,7 @@ export default function Home() {
                                     <form onSubmit={form.onSubmit((values) => {
                                         const username = localStorage.getItem("username")
                                         const password = localStorage.getItem("password")
-                                        fetch(`http://ashbucks.authorises.repl.co/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}`)
+                                        fetch(`https://ashbucks.authorises.repl.co/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}`)
                                         .then((res) => res.json())
                                         .then((data) => {
                                             if(data.hasOwnProperty("success")){
@@ -231,7 +231,7 @@ export default function Home() {
                                     <form onSubmit={form2.onSubmit((values) => {
                                         const username = localStorage.getItem("username")
                                         const password = localStorage.getItem("password")
-                                        fetch(`http://ashbucks.authorises.repl.co/redeem?username=${username}&password=${password}&code=${values.code}`)
+                                        fetch(`https://ashbucks.authorises.repl.co/redeem?username=${username}&password=${password}&code=${values.code}`)
                                         .then((res) => res.json())
                                         .then((data) => {
                                             if(data.hasOwnProperty("success")){
