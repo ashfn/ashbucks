@@ -13,8 +13,8 @@ function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
     // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
     const [windowSize, setWindowSize] = useState({
-      width: undefined,
-      height: undefined,
+      width: 0,
+      height: 0,
     });
   
     useEffect(() => {
@@ -40,16 +40,10 @@ function useWindowSize() {
     return windowSize;
   }
 
-function isNumeric(str) {
-    if (typeof str != "string") return false // we only process strings!  
-    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-}
-
 export default function Home() {
 
     const size = useWindowSize();
-    const [userData, setUserData] = useState({"transactions":[]}); 
+    const [userData, setUserData] = useState({"transactions":[],"username":"",balance:0,loaded:false}); 
 
     const [page, setPage] = useState(1);
     const [records, setRecords] = useState(userData.transactions.slice(0, 5));
@@ -82,6 +76,7 @@ export default function Home() {
                     .then((res) => res.json())
                     .then((data) => {
                         if(data.hasOwnProperty("success")){
+                            data.account["loaded"]=true
                             data.account.transactions = data.account.transactions.reverse()
                             setUserData(data.account)
                             setRecords(data.account.transactions.slice(0, 5))
@@ -95,13 +90,13 @@ export default function Home() {
         }
     }
 
-    if(!(userData.hasOwnProperty("balance"))){
+    if(!(userData.loaded)){
         reloadData()
     }
 
 
     if(userData){
-        var show = userData.hasOwnProperty("balance")
+        var show = userData.loaded
 
         const form = useForm({
             initialValues: {

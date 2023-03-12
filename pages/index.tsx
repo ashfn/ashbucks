@@ -19,7 +19,6 @@ import {
   rem,
   Image
 } from '@mantine/core';
-import { MantineLogo } from '@mantine/ds';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconNotification,
@@ -157,15 +156,15 @@ export default function HeaderMegaMenu() {
           <Image maw={140} radius="md" src="./logo.png" alt="Random image" />
 
           <Group sx={{ height: '100%' }} spacing={0} className={classes.hiddenMobile}>
-            <a href="#" className={classes.link}>
+            <Link href="#" className={classes.link}>
               Home
-            </a>
-            <a href="#" className={classes.link}>
+            </Link>
+            <Link href="#" className={classes.link}>
               FAQs
-            </a>
-            <a href="#" className={classes.link}>
+            </Link>
+            <Link href="#" className={classes.link}>
               TOS
-            </a>
+            </Link>
           </Group>
 
           <Group className={classes.hiddenMobile}>
@@ -193,16 +192,16 @@ export default function HeaderMegaMenu() {
         <ScrollArea h={`calc(100vh - ${rem(60)})`} mx="-md">
           <Divider my="sm" color={theme.colorScheme === 'dark' ? 'dark.5' : 'gray.1'} />
 
-          <a href="#" className={classes.link}>
+          <Link href="#" className={classes.link}>
             Home
-          </a>
+          </Link>
           <Collapse in={linksOpened}>{links}</Collapse>
-          <a href="#" className={classes.link}>
+          <Link href="#" className={classes.link}>
             FAQs
-          </a>
-          <a href="/login" className={classes.link}>
+          </Link>
+          <Link href="/login" className={classes.link}>
             TOS
-          </a>
+          </Link>
 
           <Divider my="sm" color={theme.colorScheme === 'dark' ? 'dark.5' : 'gray.1'} />
 
