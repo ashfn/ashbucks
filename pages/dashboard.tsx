@@ -8,7 +8,7 @@ import { useDisclosure } from '@mantine/hooks';
 import sortBy from 'lodash/sortBy';
 import { Box } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import {io, Socket } from 'Socket.IO-client'
+import {io, Socket} from 'socket.io-client';
 import crypto from "crypto"
 import { randomInt } from "crypto";
 
