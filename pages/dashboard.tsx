@@ -1,6 +1,6 @@
 import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button, Checkbox } from '@mantine/core';
-import { IconHomeDollar, IconArrowsDiff, IconGift, IconSettingsDollar, IconLogout, IconDeviceDesktopAnalytics, IconSpy } from '@tabler/icons-react';
-import {useState, useEffect} from 'react'
+import { IconHomeDollar, IconArrowsDiff, IconGift, IconSettingsDollar, IconLogout, IconDeviceDesktopAnalytics, IconSpy, IconAxe } from '@tabler/icons-react';
+import {useState, useEffect, useRef} from 'react'
 import { DataTable, DataTableSortStatus  } from 'mantine-datatable';
 import dayjs from 'dayjs';
 import Router from 'next/router';
@@ -8,6 +8,9 @@ import { useDisclosure } from '@mantine/hooks';
 import sortBy from 'lodash/sortBy';
 import { Box } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import {io, Socket } from 'Socket.IO-client'
+import crypto from "crypto"
+import { randomInt } from "crypto";
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -40,6 +43,45 @@ function useWindowSize() {
     return windowSize;
   }
 
+interface ServerToClientEvents {
+  noArg: () => void;
+  basicEmit: (a: number, b: string, c: Buffer) => void;
+  withAck: (d: string, callback: (e: number) => void) => void;
+  gained: (x: number) => void;
+  statusbad: (x: string) => void;
+  statusgood: (x: string) => void;
+}
+
+interface ClientToServerEvents {
+  hello: () => void;
+  stopmining: () => void;
+  username: (username: string) => void;
+}
+
+interface InterServerEvents {
+  ping: () => void;
+}
+
+interface SocketData {
+  name: string;
+  age: number;
+}
+
+interface StatusMsg {
+    good: boolean;
+    message: string;
+}
+
+type Nullable<T> = T | null
+
+let socket:Nullable<Socket<ServerToClientEvents, ClientToServerEvents>> = null;
+
+function ms(){
+    setTimeout(() => {
+        return 0
+    }, 20)
+}
+
 export default function Home() {
 
     const size = useWindowSize();
@@ -48,8 +90,7 @@ export default function Home() {
     const [page, setPage] = useState(1);
     const [records, setRecords] = useState(userData.transactions.slice(0, 5));
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
-
-    
+    const [miningStatus, setMiningStatus] = useState<StatusMsg[]>([])
 
     useEffect(() => {
       const from = (page - 1) * 5;
@@ -110,6 +151,53 @@ export default function Home() {
         </Tabs.Panel>
     )
 
+    const [connected, setConnected] = useState<boolean>(false);
+
+
+    const [mining, setMining] = useState<boolean>(false);
+
+    const [totalSolved, setTotalSolved] = useState<number>(0);
+
+    const divRef = useRef<null | HTMLDivElement>(null);
+
+    useEffect((): any => {
+        if(socket==undefined){
+            socket = io("https://ashbucks.authorises.repl.co")
+            socket.on("connect", () => {
+                miningStatus.push({good:true, message:"Connected to server"})
+                console.log("Socket connected..")
+            })
+            socket.on("disconnect", () => {
+                console.log("Socket disconnected...")
+                miningStatus.push({good:false, message:"Disconnected from server"})
+                socket = null
+            })
+    
+            socket.on("gained", (x) => {
+                console.log("Gained "+x+" ashbucks")
+                miningStatus.push({good:true, message:"Gained "+x+" ashbucks"})
+                reloadData()
+                if(divRef.current!=null){
+                    divRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            })
+
+            socket.on("statusbad", (x) => {
+                miningStatus.push({good:false, message:x})
+                if(divRef.current!=null){
+                    divRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            })
+
+            socket.on("statusgood", (x) => {
+                miningStatus.push({good:true, message:x})
+                if(divRef.current!=null){
+                    divRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            })
+        }
+    })
+
     if(userData){
         var show = userData.loaded
 
@@ -146,8 +234,10 @@ export default function Home() {
                         <Tabs.Tab value="dashboard" icon={<IconHomeDollar size="0.8rem" />}>Dashboard</Tabs.Tab>
                         <Tabs.Tab value="transfer" icon={<IconArrowsDiff size="0.8rem" />}>Transfer</Tabs.Tab>
                         <Tabs.Tab value="redeem" icon={<IconGift size="0.8rem" />}>Redeem</Tabs.Tab>
-                        <Tabs.Tab value="settings" icon={<IconSettingsDollar size="0.8rem" />}>Settings</Tabs.Tab>
+                        <Tabs.Tab value="mining" icon={<IconAxe size="0.8rem" />}>Mining</Tabs.Tab>
                         {userData.admin ? adminTab : <></>}
+                        <Tabs.Tab value="settings" icon={<IconSettingsDollar size="0.8rem" />}>Settings</Tabs.Tab>
+                        
                         </Tabs.List>
                 
                         <Tabs.Panel value="dashboard" pt="xs">
@@ -213,16 +303,16 @@ export default function Home() {
                                         })
                                     })}>
                                         <TextInput label="Recipient" placeholder="Username you want to send ashbucks to" required {...form.getInputProps('recipient')} />
-                                        <NumberInput 
+                                        <TextInput 
                                             label="Amount" 
                                             required 
                                             mt="md" 
                                             placeholder='Enter amount to send'
-                                            hideControls
-                                            precision={2}
-                                            min={0.01}
-                                            step={0.05}
-                                            max={25000}
+                                            
+                                            //precision={2}
+                                            //min={0.01}
+                                            //step={0.05}
+                                            //max={25000}
                                             {...form.getInputProps('amount')} 
                                         />
                                     
@@ -287,6 +377,49 @@ export default function Home() {
                             }
                         </Tabs.Panel>
     
+                        <Tabs.Panel value="mining" pt="xs">
+                            <Center>
+                                <Space h="xl" />
+                                <Paper color='gray.8'>
+                                    {mining?
+                                    
+                                    <Button color="red.6" leftIcon={<IconAxe/>} onClick={() => {
+                                        setMining(false)
+                                        if(socket!=undefined){
+                                            socket.emit("stopmining")
+                                        }
+                                
+                                    }}>Stop Mining</Button>
+                                    
+                                    :
+
+                                    <Button color="green.4" leftIcon={<IconAxe/>} onClick={() => {
+                                        setMining(true)
+                                        if(socket!=undefined){
+                                            if(userData.loaded){
+                                                socket.emit("username", userData.username)
+                                            }
+                                        }
+                                
+                                    }}>Start Mining</Button>
+
+                                    }
+                                    <div style={{
+                                        overflowY: 'scroll',
+                                        width: '100%',
+                                        height: '300px'
+                                    }}>
+                                    {miningStatus.map((x) => {
+                                        return <Text key={Math.random()} color={x.good?"green.4":"red.6"}>{x.message}</Text>
+                                    })}
+                                    <div ref={divRef}></div>
+                                    </div>
+                                </Paper>
+
+                            </Center>
+
+                        </Tabs.Panel>
+
                         <Tabs.Panel value="settings" pt="xs">
                             <Center>
                                 <Space h="xl" />
