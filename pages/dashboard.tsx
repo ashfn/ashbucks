@@ -1,4 +1,4 @@
-import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button, Checkbox } from '@mantine/core';
+import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button, Checkbox, createStyles } from '@mantine/core';
 import { IconHomeDollar, IconArrowsDiff, IconGift, IconSettingsDollar, IconLogout, IconDeviceDesktopAnalytics, IconSpy, IconAxe } from '@tabler/icons-react';
 import {useState, useEffect, useRef} from 'react'
 import { DataTable, DataTableSortStatus  } from 'mantine-datatable';
@@ -70,17 +70,22 @@ interface SocketData {
 interface StatusMsg {
     good: boolean;
     message: string;
+    date: string;
 }
 
 type Nullable<T> = T | null
 
 let socket:Nullable<Socket<ServerToClientEvents, ClientToServerEvents>> = null;
 
-function ms(){
-    setTimeout(() => {
-        return 0
-    }, 20)
-}
+const useStyles = createStyles((theme) => ({
+    miningConsole: {
+        width:"100%",
+        marginTop:"10px",
+        overflow: "hidden",
+        padding: "10px",
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
+    }
+}));
 
 export default function Home() {
 
@@ -91,6 +96,8 @@ export default function Home() {
     const [records, setRecords] = useState(userData.transactions.slice(0, 5));
     const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
     const [miningStatus, setMiningStatus] = useState<StatusMsg[]>([])
+
+    const { classes, theme } = useStyles();
 
     useEffect(() => {
       const from = (page - 1) * 5;
@@ -164,36 +171,50 @@ export default function Home() {
         if(socket==undefined){
             socket = io("https://ashbucks.authorises.repl.co")
             socket.on("connect", () => {
-                miningStatus.push({good:true, message:"Connected to server"})
+                var time = new Date().getTime();
+                setMiningStatus((current => [
+                    ...current,
+                    {good:true, message:"Connected to server", "date":dayjs(time).format('HH:mm')}
+                ]))
                 console.log("Socket connected..")
+                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
             socket.on("disconnect", () => {
-                console.log("Socket disconnected...")
-                miningStatus.push({good:false, message:"Disconnected from server"})
+                var time = new Date().getTime();
+                setMiningStatus((current => [
+                    ...current,
+                    {good:false, message:"Disconnected from server, reload tab to continue mining", "date":dayjs(time).format('HH:mm')}
+                ]))
                 socket = null
+                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
     
             socket.on("gained", (x) => {
-                console.log("Gained "+x+" ashbucks")
-                miningStatus.push({good:true, message:"Gained "+x+" ashbucks"})
+                var time = new Date().getTime();
+                setMiningStatus((current => [
+                    ...current,
+                    {good:true, message:"Gained "+x+" ashbucks", "date":dayjs(time).format('HH:mm')}
+                ]))
                 reloadData()
-                if(divRef.current!=null){
-                    divRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
+                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
 
             socket.on("statusbad", (x) => {
-                miningStatus.push({good:false, message:x})
-                if(divRef.current!=null){
-                    divRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
+                var time = new Date().getTime();
+                setMiningStatus((current => [
+                    ...current,
+                    {good:false, message:x, "date":dayjs(time).format('HH:mm')}
+                ]))
+                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
 
             socket.on("statusgood", (x) => {
-                miningStatus.push({good:true, message:x})
-                if(divRef.current!=null){
-                    divRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
+                var time = new Date().getTime();
+                setMiningStatus((current => [
+                    ...current,
+                    {good:true, message:x, "date":dayjs(time).format('HH:mm')}
+                ]))
+                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
         }
     })
@@ -257,7 +278,7 @@ export default function Home() {
                                             accessor: 'date',
                                             textAlignment: 'center',
                                             width: '25%',
-                                            render: ({ date }) => dayjs(date).format('HH:MM MM/D/YYYY'),
+                                            render: ({ date }) => dayjs(date).format('HH:mm MM/D/YYYY'),
                                             sortable: true,
                                         },
                                         ]}
@@ -380,8 +401,8 @@ export default function Home() {
                         <Tabs.Panel value="mining" pt="xs">
                             <Center>
                                 <Space h="xl" />
-                                <Paper color='gray.8'>
-                                    {mining?
+                                <Paper style={{width:"80%"}}>
+                                {mining?
                                     
                                     <Button color="red.6" leftIcon={<IconAxe/>} onClick={() => {
                                         setMining(false)
@@ -404,17 +425,28 @@ export default function Home() {
                                     }}>Start Mining</Button>
 
                                     }
+                                <Center>
+                                <div className={classes.miningConsole} key={miningStatus.length}>
+
                                     <div style={{
-                                        overflowY: 'scroll',
+                                        overflow: 'auto',
                                         width: '100%',
                                         height: '300px'
                                     }}>
+
                                     {miningStatus.map((x) => {
-                                        return <Text key={Math.random()} color={x.good?"green.4":"red.6"}>{x.message}</Text>
+                                        return (
+                                            <>
+                                            <Text color="gray.5">{x.date} <Text span key={Math.random()} color={x.good?"green.4":"red.6"}>{x.message}</Text></Text>
+                                            </>
+                                        )
                                     })}
-                                    <div ref={divRef}></div>
+                                    <Text ref={divRef}></Text>
                                     </div>
+                                </div>
+                                </Center>
                                 </Paper>
+                                
 
                             </Center>
 

@@ -186,9 +186,7 @@ export default function HeaderMegaMenu() {
 
   function reloadData(){
       if (typeof window !== "undefined") {
-          if(localStorage.getItem("username")===null){
-              Router.push("/")
-          }else{
+          if(localStorage.getItem("username")!=null){
               const username = localStorage.getItem("username")
               const password = localStorage.getItem("password")
   
@@ -225,7 +223,7 @@ export default function HeaderMegaMenu() {
             <Link href="#faq" className={classes.link}>
               FAQs
             </Link>
-            <Link href="#tos" className={classes.link}>
+            <Link href="/tos" className={classes.link}>
               TOS
             </Link>
           </Group>
@@ -272,7 +270,7 @@ export default function HeaderMegaMenu() {
           <Link href="#faq" className={classes.link}>
             FAQs
           </Link>
-          <Link href="#tos" className={classes.link}>
+          <Link href="/tos" className={classes.link}>
             TOS
           </Link>
 
@@ -309,6 +307,9 @@ export default function HeaderMegaMenu() {
               className={classes.control}
               variant="gradient"
               gradient={{ from: 'blue', to: 'cyan' }}
+              onClick={() => {
+                Router.push("/signup");
+              }}
             >
               Get started
             </Button>
@@ -342,14 +343,19 @@ export default function HeaderMegaMenu() {
             </Accordion.Panel>
           </Accordion.Item>
 
-          <Accordion.Item className={classes.faqItem} value="newsletter">
+          <Accordion.Item className={classes.faqItem} value="password-reset">
             <Accordion.Control>How do I reset my password?</Accordion.Control>
             <Accordion.Panel>If you need to reset your password, you can contact support.</Accordion.Panel>
           </Accordion.Item>
 
-          <Accordion.Item className={classes.faqItem} value="credit-card">
+          <Accordion.Item className={classes.faqItem} value="hashing">
             <Accordion.Control>Do you store passwords securely?</Accordion.Control>
             <Accordion.Panel>All passwords are hashed using the latest security standards </Accordion.Panel>
+          </Accordion.Item>
+
+          <Accordion.Item className={classes.faqItem} value="multiple-acc">
+            <Accordion.Control>Can I make multiple accounts?</Accordion.Control>
+            <Accordion.Panel>Making multiple accounts is against our <Link href="/tos">Terms of Service</Link>.</Accordion.Panel>
           </Accordion.Item>
         </Accordion>
       </Container>
