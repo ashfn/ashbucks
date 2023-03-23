@@ -120,7 +120,7 @@ export default function Home() {
                 const username = localStorage.getItem("username")
                 const password = localStorage.getItem("password")
     
-                fetch(`https://ashbucks.authorises.repl.co/userinfo?username=${username}&password=${password}`)
+                fetch(`https://ashbucks.onrender.com/userinfo?username=${username}&password=${password}`)
                     .then((res) => res.json())
                     .then((data) => {
                         if(data.hasOwnProperty("success")){
@@ -169,7 +169,7 @@ export default function Home() {
 
     useEffect((): any => {
         if(socket==undefined){
-            socket = io("https://ashbucks.authorises.repl.co")
+            socket = io("https://ashbucks.onrender.com")
             socket.on("connect", () => {
                 var time = new Date().getTime();
                 setMiningStatus((current => [
@@ -310,7 +310,7 @@ export default function Home() {
                                         const username = localStorage.getItem("username")
                                         const password = localStorage.getItem("password")
                                         var hide = values.hide?"&notrace=true":""
-                                        fetch(`https://ashbucks.authorises.repl.co/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}${hide}`)
+                                        fetch(`https://ashbucks.onrender.com/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}${hide}`)
                                         .then((res) => res.json())
                                         .then((data) => {
                                             if(data.hasOwnProperty("success")){
@@ -367,7 +367,7 @@ export default function Home() {
                                     <form onSubmit={form2.onSubmit((values) => {
                                         const username = localStorage.getItem("username")
                                         const password = localStorage.getItem("password")
-                                        fetch(`https://ashbucks.authorises.repl.co/redeem?username=${username}&password=${password}&code=${values.code}`)
+                                        fetch(`https://ashbucks.onrender.com/redeem?username=${username}&password=${password}&code=${values.code}`)
                                         .then((res) => res.json())
                                         .then((data) => {
                                             if(data.hasOwnProperty("success")){
