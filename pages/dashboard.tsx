@@ -177,7 +177,14 @@ export default function Home() {
                     {good:true, message:"Connected to server", "date":dayjs(time).format('HH:mm')}
                 ]))
                 console.log("Socket connected..")
-                divRef.current?.scrollIntoView({behavior: 'smooth'});
+
+                if (typeof window !== "undefined") {
+                    if(!(localStorage.getItem("mining")===null)){
+                        localStorage.removeItem("mining")
+                        setMining(true)
+                    }
+                 }
+                
             })
             socket.on("disconnect", () => {
                 var time = new Date().getTime();
@@ -185,8 +192,15 @@ export default function Home() {
                     ...current,
                     {good:false, message:"Disconnected from server, reload tab to continue mining", "date":dayjs(time).format('HH:mm')}
                 ]))
-                socket = null
-                divRef.current?.scrollIntoView({behavior: 'smooth'});
+
+                if(mining){
+                    if (typeof window !== "undefined") {
+                        console.log("Attempting thing!")
+                        localStorage.setItem("mining", "true")
+                        Router.reload(window.location.pathname)
+                    }
+    
+                }
             })
     
             socket.on("gained", (x) => {
@@ -196,7 +210,6 @@ export default function Home() {
                     {good:true, message:"Gained "+x+" ashbucks", "date":dayjs(time).format('HH:mm')}
                 ]))
                 reloadData()
-                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
 
             socket.on("statusbad", (x) => {
@@ -205,7 +218,7 @@ export default function Home() {
                     ...current,
                     {good:false, message:x, "date":dayjs(time).format('HH:mm')}
                 ]))
-                divRef.current?.scrollIntoView({behavior: 'smooth'});
+                
             })
 
             socket.on("statusgood", (x) => {
@@ -214,10 +227,13 @@ export default function Home() {
                     ...current,
                     {good:true, message:x, "date":dayjs(time).format('HH:mm')}
                 ]))
-                divRef.current?.scrollIntoView({behavior: 'smooth'});
             })
         }
     })
+
+    useEffect(() => {
+        divRef.current?.scrollIntoView()
+    }, [miningStatus]);
 
     if(userData){
         var show = userData.loaded
@@ -441,7 +457,7 @@ export default function Home() {
                                             </>
                                         )
                                     })}
-                                    <Text ref={divRef}></Text>
+                                    <Text  color="green.4" ref={divRef}></Text>
                                     </div>
                                 </div>
                                 </Center>
