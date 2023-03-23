@@ -325,8 +325,7 @@ export default function Home() {
                                     <form onSubmit={form.onSubmit((values) => {
                                         const username = localStorage.getItem("username")
                                         const password = localStorage.getItem("password")
-                                        var hide = values.hide?"&notrace=true":""
-                                        fetch(`https://ashbucks.onrender.com/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}${hide}`)
+                                        fetch(`https://ashbucks.onrender.com/transfer?username=${username}&password=${password}&sendto=${values.recipient}&amount=${values.amount}`)
                                         .then((res) => res.json())
                                         .then((data) => {
                                             if(data.hasOwnProperty("success")){
@@ -352,13 +351,7 @@ export default function Home() {
                                             //max={25000}
                                             {...form.getInputProps('amount')} 
                                         />
-                                    
-                                        <Checkbox
-                                            icon={IconSpy}
-                                            mt="md"
-                                            label="Make this transaction invisible"
-                                            {...form.getInputProps('hide')} 
-                                        />
+                                
                                         <Button leftIcon={<IconArrowsDiff />} type="submit" fullWidth mt="xl">
                                             Transfer
                                         </Button>
