@@ -48,7 +48,7 @@ export default function Home() {
         
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
             <form onSubmit={form.onSubmit((values) => {
-                fetch(`https://ashbucks.authorises.repl.co/makeaccount?username=${values.username}&password=${values.password}`)
+                fetch(`https://ashbucks.onrender.com/makeaccount?username=${values.username}&password=${values.password}`)
                     .then((res) => res.json())
                     .then((data) => {
                         if(data.hasOwnProperty("success")){
