@@ -1,4 +1,4 @@
-import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button, Checkbox, createStyles } from '@mantine/core';
+import { Tabs, Center, Paper, LoadingOverlay, Text, Title, Container, Space, TextInput, NumberInput, Button, Checkbox, createStyles, Image, Group } from '@mantine/core';
 import { IconHomeDollar, IconArrowsDiff, IconGift, IconSettingsDollar, IconLogout, IconDeviceDesktopAnalytics, IconSpy, IconAxe } from '@tabler/icons-react';
 import {useState, useEffect, useRef} from 'react'
 import { DataTable, DataTableSortStatus  } from 'mantine-datatable';
@@ -197,7 +197,7 @@ export default function Home() {
                     if (typeof window !== "undefined") {
                         console.log("Attempting thing!")
                         localStorage.setItem("mining", "true")
-                        Router.reload(window.location.pathname)
+                        Router.reload()
                     }
     
                 }
@@ -474,6 +474,9 @@ export default function Home() {
                         </Tabs.Panel>
                         {userData.admin ? adminSection : <></>}
                     </Tabs>
+                    <Space h="md"/>
+                    © 2023 ashbucks
+
                 </Paper>
             </Center>
         );
